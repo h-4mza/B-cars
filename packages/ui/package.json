@@ -1,0 +1,20 @@
+{
+  "name": "@repo/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "scripts": {
+    "lint": "eslint src/",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "^6.0.3"
+  }
+}

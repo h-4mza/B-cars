@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // Argon2id hash
+  phone         String?
+  role          Role      @default(CLIENT)
+  mfaSecret     String?   // chiffré
+  mfaEnabled    Boolean   @default(false)
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // soft delete
+  reservations  Reservation[]
+  documents     Document[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  name        String   // "Casablanca Aéroport (CMN)"
+  type        LocationType // AIRPORT, AGENCY, HOTEL
+  city        String
+  code        String?  // Code IATA ex: CMN
+  address     String?
+  latitude    Float?
+  longitude   Float?
+  isActive    Boolean  @default(true)
+  hasShuttle  Boolean  @default(false) // Navette gratuite disponible
+  
+  pickupReservations  Reservation[] @relation("PickupLocation")
+  returnReservations  Reservation[] @relation("ReturnLocation")
+  vehicles            Vehicle[]
+}
+
+model Vehicle {
+  id            String    @id @default(cuid())
+  brand         String
+  model         String
+  year          Int
+  fuel          FuelType
+  transmission  Transmission
+  mileage       Int
+  licensePlate  String    @unique
+  status        VehicleStatus @default(AVAILABLE)
+  pricePerDay   Float
+  depositAmount Float     @default(0)
+  images        String    @default("[]") // S3 URLs
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  reservations  Reservation[]
+
+  category           VehicleCategory  @default(COMPACT)
+  seats              Int @default(5)
+  doors              Int @default(4)
+  hasAC              Boolean @default(true)
+  hasGPS             Boolean @default(false)
+  hasBluetooth       Boolean @default(false)
+  mileagePolicy      MileagePolicy @default(UNLIMITED)
+  mileageLimit       Int?          // si pas illimité, km inclus/jour
+  fuelPolicy         FuelPolicy @default(FULL_TO_FULL)
+  minDriverAge       Int @default(21)
+  rating             Float?
+  reviewCount        Int?
+  ratingLabel        String?
+  includedFeatures   String    @default("[]") // ["CDW", "Theft Protection", "Roadside Assistance", "TPL"]
+  isAirportPickup    Boolean @default(false)
+  hasShuttle         Boolean @default(false)
+  locationId         String?
+  location           Location? @relation(fields: [locationId], references: [id])
+}
+
+model Reservation {
+  id            String    @id @default(cuid())
+  userId        String
+  vehicleId     String
+  startDate     DateTime
+  endDate       DateTime
+  totalPrice    Float
+  status        ReservationStatus @default(PENDING)
+  options       String            @default("{}") // GPS, siège bébé, etc.
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id])
+  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id])
+  payments      Payment[]
+  contract      Contract?
+
+  pickupLocationId   String
+  returnLocationId   String
+  pickupTime         String    // "10:00"
+  returnTime         String    // "10:00"
+  driverAge          String    // "22+"
+  driverCountry      String
+  cancellationPolicy CancellationPolicy @default(STANDARD)
+  voucherCode        String?   // numéro bon de réservation
+
+  pickupLocation     Location  @relation("PickupLocation", fields: [pickupLocationId], references: [id])
+  returnLocation     Location  @relation("ReturnLocation", fields: [returnLocationId], references: [id])
+}
+
+model Payment {
+  id              String    @id @default(cuid())
+  reservationId   String
+  amount          Float
+  type            PaymentType // FULL, PARTIAL, DEPOSIT
+  provider        PaymentProvider // STRIPE, CMI, PAYPAL
+  externalId      String?   // Stripe payment intent ID
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime  @default(now())
+  reservation     Reservation @relation(fields: [reservationId], references: [id])
+}
+
+model Document {
+  id            String    @id @default(cuid())
+  userId        String
+  type          DocumentType // PASSPORT, CIN, LICENSE
+  s3Key         String    // clé S3 (pas l'URL complète)
+  encryptedKey  String    // clé AES chiffrée
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Contract {
+  id              String    @id @default(cuid())
+  reservationId   String    @unique
+  content         String    // HTML du contrat
+  signatureUrl    String?   // S3 URL de la signature
+  signedAt        DateTime?
+  reservation     Reservation @relation(fields: [reservationId], references: [id])
+}
+
+enum Role {
+  CLIENT
+  AGENT
+  FLEET_MANAGER
+  ADMIN
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  RESERVED
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentType {
+  FULL
+  PARTIAL
+  DEPOSIT
+}
+
+enum PaymentProvider {
+  STRIPE
+  CMI
+  PAYPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum DocumentType {
+  PASSPORT
+  CIN
+  LICENSE
+}
+
+enum LocationType {
+  AIRPORT
+  AGENCY
+  HOTEL
+  CUSTOM
+}
+
+enum CancellationPolicy {
+  FREE_48H
+  FREE_24H
+  NON_REFUNDABLE
+  STANDARD
+}
+
+enum VehicleCategory {
+  MINI
+  ECONOMY
+  COMPACT
+  INTERMEDIATE
+  FULLSIZE
+  SUV
+  LUXURY
+  VAN
+  ELECTRIC
+}
+
+enum MileagePolicy {
+  UNLIMITED
+  LIMITED
+}
+
+enum FuelPolicy {
+  FULL_TO_FULL
+  FULL_TO_EMPTY
+  PREPAID
+}
