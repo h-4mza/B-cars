@@ -5,10 +5,36 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
+import { PrismaService } from '../prisma/prisma.service';
+import * as argon2 from 'argon2';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private prisma: PrismaService,
+  ) {}
+
+  @Get('setup-admin')
+  async setupAdmin() {
+    const existingAdmin = await this.prisma.user.findFirst({
+      where: { email: 'admin@carjet.com' }
+    });
+    if (existingAdmin) {
+      return { message: 'Admin already exists' };
+    }
+    
+    const hashedPassword = await argon2.hash('admin123', { type: argon2.argon2id });
+    await this.prisma.user.create({
+      data: {
+        email: 'admin@carjet.com',
+        password: hashedPassword,
+        name: 'Super Admin',
+        role: 'ADMIN',
+      },
+    });
+    return { message: 'Admin user created successfully! Email: admin@carjet.com, Pass: admin123' };
+  }
 
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {

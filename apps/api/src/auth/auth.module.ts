@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     PassportModule,
     ConfigModule,
     JwtModule.register({}),
+    PrismaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshTokenStrategy],
