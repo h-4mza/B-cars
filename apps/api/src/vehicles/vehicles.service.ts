@@ -11,8 +11,9 @@ export class VehiclesService {
   ) {}
 
   async create(dto: CreateVehicleDto, files: Express.Multer.File[]) {
+    const validFiles = files || [];
     const imageUrls = await Promise.all(
-      files.map((file) => this.filesService.uploadFile(file, 'vehicles')),
+      validFiles.map((file) => this.filesService.uploadFile(file, 'vehicles')),
     );
 
     return this.prisma.vehicle.create({

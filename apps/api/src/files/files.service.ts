@@ -23,9 +23,17 @@ export class FilesService {
   }
 
   async uploadBuffer(buffer: Buffer, originalName: string, mimetype: string, folder: string) {
+    const bucket = this.configService.get<string>('AWS_BUCKET_NAME');
+    const accessKey = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    
+    // If AWS is not configured (e.g. Render free tier), fallback to base64
+    if (!bucket || bucket === '' || !accessKey || accessKey === '' || accessKey === 'mock_access_key') {
+      return `data:${mimetype};base64,${buffer.toString('base64')}`;
+    }
+
     const key = `${folder}/${uuidv4()}-${originalName}`;
     const command = new PutObjectCommand({
-      Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
+      Bucket: bucket,
       Key: key,
       Body: buffer,
       ContentType: mimetype,
@@ -47,6 +55,10 @@ export class FilesService {
   }
 
   async getPresignedUrl(key: string) {
+    if (!key) return key;
+    if (key.startsWith('http')) return key;
+    if (key.startsWith('data:')) return key;
+
     const command = new GetObjectCommand({
       Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
       Key: key,
