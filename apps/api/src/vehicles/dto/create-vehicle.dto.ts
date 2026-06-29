@@ -13,6 +13,7 @@ export class CreateVehicleDto {
 
   @IsInt()
   @Min(2000)
+  @Type(() => Number)
   year: number;
 
   @IsEnum(FuelType)
@@ -23,6 +24,7 @@ export class CreateVehicleDto {
 
   @IsInt()
   @Min(0)
+  @Type(() => Number)
   mileage: number;
 
   @IsString()

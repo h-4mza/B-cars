@@ -22,7 +22,6 @@ export default function AddVehiclePage() {
     fuel: 'DIESEL',
     transmission: 'MANUAL',
     pricePerDay: 300,
-    category: 'ECONOMY',
     mileage: 0,
     deposit: 5000
   });
@@ -129,17 +128,6 @@ export default function AddVehiclePage() {
                   <select name="transmission" value={formData.transmission} onChange={handleChange} className="w-full h-10 px-3 py-2 rounded-md bg-[#0a0a0a] border border-white/10 text-white focus:border-[#C9A84C] focus:outline-none">
                     <option value="MANUAL">Manuelle</option>
                     <option value="AUTOMATIC">Automatique</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-400">Catégorie</label>
-                  <select name="category" value={formData.category} onChange={handleChange} className="w-full h-10 px-3 py-2 rounded-md bg-[#0a0a0a] border border-white/10 text-white focus:border-[#C9A84C] focus:outline-none">
-                    <option value="ECONOMY">Économique</option>
-                    <option value="COMPACT">Compacte</option>
-                    <option value="SEDAN">Berline</option>
-                    <option value="SUV">SUV</option>
-                    <option value="LUXURY">Luxe</option>
-                    <option value="VAN">Utilitaire</option>
                   </select>
                 </div>
                 <div className="space-y-2">
