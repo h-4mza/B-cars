@@ -7,10 +7,17 @@ export class NotificationsService {
   private resend: Resend;
 
   constructor(private configService: ConfigService) {
-    this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    }
   }
 
   async sendEmail(to: string, subject: string, html: string) {
+    if (!this.resend) {
+      console.log('Email sending skipped: RESEND_API_KEY is not configured');
+      return;
+    }
     try {
       await this.resend.emails.send({
         from: 'Location Maroc <noreply@votre-domaine.com>', // Note: Nécessite un domaine validé sur Resend
