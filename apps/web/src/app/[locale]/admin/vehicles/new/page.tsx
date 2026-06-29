@@ -21,43 +21,44 @@ export default function AddVehiclePage() {
     fuel: 'DIESEL',
     transmission: 'MANUAL',
     pricePerDay: 300,
-    category: 'ECONOMY'
+    category: 'ECONOMY',
+    mileage: 0,
+    deposit: 5000
   });
+
+  const [images, setImages] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Create FormData to handle image upload if needed in the future
       const form = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         form.append(key, value.toString());
       });
+      
+      images.forEach(image => {
+        form.append('images', image);
+      });
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/vehicles`, {
         method: 'POST',
         credentials: 'include',
-        // Note: For multipart/form-data, don't set Content-Type header, let browser handle it.
-        // But since we are not sending files right now, we can just send JSON.
+        body: form,
       });
       
-      // Let's rewrite to send JSON directly for simplicity if no files are being uploaded
-      const resJson = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (!resJson.ok) throw new Error();
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(err);
+      }
       
       toast.success('Véhicule ajouté avec succès');
       router.push('/admin/vehicles');
-    } catch (error) {
-      toast.error('Erreur lors de l\'ajout du véhicule');
+    } catch (error: any) {
+      console.error(error);
+      toast.error('Erreur lors de l\'ajout du véhicule: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -144,10 +145,30 @@ export default function AddVehiclePage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-6 border-t border-white/5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-400">Photos du véhicule</label>
+                <Input 
+                  type="file" 
+                  multiple 
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setImages(Array.from(e.target.files));
+                    }
+                  }}
+                  className="bg-[#0a0a0a] border-white/10 text-white focus:border-[#C9A84C] file:bg-[#C9A84C] file:text-black file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4 file:font-semibold cursor-pointer" 
+                />
+                <p className="text-xs text-gray-500">Vous pouvez sélectionner plusieurs images (maximum 5).</p>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-white/5">
                 <Button type="submit" disabled={loading} className="bg-[#C9A84C] hover:bg-[#F5D078] text-[#0a0a0a] font-bold px-8">
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Enregistrement...' : 'Enregistrer le véhicule'}
+                  {loading ? 'Enregistrement...' : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Enregistrer le véhicule
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
