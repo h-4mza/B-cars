@@ -124,7 +124,15 @@ export class VehiclesService {
         return {
           ...vehicle,
           images: parsedImages && parsedImages.length > 0 ? await Promise.all(
-            parsedImages.map((key: string) => this.filesService.getPresignedUrl(key)),
+            parsedImages.map(async (key: string) => {
+              if (key.startsWith('http')) return key;
+              try {
+                return await this.filesService.getPresignedUrl(key);
+              } catch (e) {
+                console.error('Failed to presign URL', e);
+                return key; // Fallback to raw key if AWS is not configured
+              }
+            }),
           ) : [],
         };
       }),
@@ -146,7 +154,15 @@ export class VehiclesService {
     return {
       ...vehicle,
       images: parsedImages && parsedImages.length > 0 ? await Promise.all(
-        parsedImages.map((key: string) => this.filesService.getPresignedUrl(key)),
+        parsedImages.map(async (key: string) => {
+          if (key.startsWith('http')) return key;
+          try {
+            return await this.filesService.getPresignedUrl(key);
+          } catch (e) {
+            console.error('Failed to presign URL', e);
+            return key;
+          }
+        }),
       ) : [],
     };
   }
