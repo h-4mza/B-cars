@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, XCircle, Clock, Car, Eye, Phone, Mail, MapPin, CreditCard, User, Calendar } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Car, Eye, Phone, Mail, MapPin, CreditCard, User, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -20,7 +20,8 @@ export default function AdminReservationsPage() {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/admin/reservations`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/admin/reservations`, {
         credentials: 'include'
       });
       if (response.ok) {
@@ -74,7 +75,7 @@ export default function AdminReservationsPage() {
       case 'PENDING':
         return <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"><Clock className="w-3 h-3" /> En attente</span>;
       case 'CONFIRMED':
-        return <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Confirmé</span>;
+        return <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Confirmé</span>;
       case 'CANCELLED':
         return <span className="px-3 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1"><XCircle className="w-3 h-3" /> Annulé</span>;
       default:

@@ -36,9 +36,10 @@ export default function AdminVehiclesPage() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles`);
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/vehicles`);
       const data = await response.json();
-      setVehicles(data);
+      setVehicles(Array.isArray(data) ? data : (data.results || []));
     } catch (error) {
       toast.error('Erreur lors du chargement de la flotte');
     } finally {
@@ -54,7 +55,8 @@ export default function AdminVehiclesPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) return;
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles/${id}`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/vehicles/${id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
