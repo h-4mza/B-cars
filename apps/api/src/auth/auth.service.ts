@@ -34,7 +34,18 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersService.findOneByEmail(dto.email);
+    let user = await this.usersService.findOneByEmail(dto.email);
+    
+    // Auto-create admin if it doesn't exist
+    if (!user && dto.email === 'admin@carjet.com' && dto.password === 'admin123') {
+      const hashedPassword = await argon2.hash('admin123', { type: argon2.argon2id });
+      user = await this.usersService.create({
+        email: 'admin@carjet.com',
+        password: hashedPassword,
+        role: 'ADMIN',
+      });
+    }
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
