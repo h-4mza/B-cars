@@ -23,7 +23,8 @@ export default function AdminReservationsPage() {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
       const response = await fetch(`${baseUrl}/admin/reservations`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-        credentials: 'include'
+        credentials: 'include',
+        cache: 'no-store'
       });
       if (response.ok) {
         const data = await response.json();
