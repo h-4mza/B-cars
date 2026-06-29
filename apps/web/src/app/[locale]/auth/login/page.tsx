@@ -25,7 +25,8 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/auth/login`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -33,11 +34,12 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Identifiants invalides');
+        const errorText = await response.text();
+        throw new Error(`Erreur API (${response.status}): ${errorText}`);
       }
 
       // We need to fetch /me to get user details
-      const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/auth/me`, {
+      const userResponse = await fetch(`${baseUrl}/auth/me`, {
         credentials: 'include',
       });
 
