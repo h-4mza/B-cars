@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { ArrowLeft, Save } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function AddVehiclePage() {
   const router = useRouter();
