@@ -16,9 +16,12 @@ export class VehiclesService {
       validFiles.map((file) => this.filesService.uploadFile(file, 'vehicles')),
     );
 
+    const { deposit, ...restDto } = dto;
+
     return this.prisma.vehicle.create({
       data: {
-        ...dto,
+        ...restDto,
+        depositAmount: deposit || 0,
         images: JSON.stringify(imageUrls),
         includedFeatures: '[]'
       },
