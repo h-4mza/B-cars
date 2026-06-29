@@ -15,7 +15,6 @@ async function main() {
     create: {
       email: 'admin@carjet.com',
       password: hashedPassword,
-      name: 'Super Admin',
       role: 'ADMIN',
     },
   });

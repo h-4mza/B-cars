@@ -29,7 +29,6 @@ export class AuthController {
       data: {
         email: 'admin@carjet.com',
         password: hashedPassword,
-        name: 'Super Admin',
         role: 'ADMIN',
       },
     });
