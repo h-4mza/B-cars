@@ -59,12 +59,18 @@ export class AuthController {
     return { message: 'Tokens refreshed' };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    await this.authService.logout(req.user.userId);
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return { message: 'Logged out successfully' };
   }
 

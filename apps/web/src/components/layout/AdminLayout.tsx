@@ -45,12 +45,13 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/auth/logout`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
+      await fetch(`${baseUrl}/auth/logout`, {
         method: 'POST',
       });
-      logout();
-      router.push('/auth/login');
     } catch (error) {
+      console.error(error);
+    } finally {
       logout();
       router.push('/auth/login');
     }
