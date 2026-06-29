@@ -45,9 +45,11 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
+      const { token } = useAuthStore.getState();
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
       await fetch(`${baseUrl}/auth/logout`, {
         method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       });
     } catch (error) {
       console.error(error);

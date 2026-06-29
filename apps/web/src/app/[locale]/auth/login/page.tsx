@@ -26,20 +26,24 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginInput) => {
     try {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/auth/login`, {
+      const loginResponse = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur API (${response.status}): ${errorText}`);
+      if (!loginResponse.ok) {
+        const errorData = await loginResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Identifiants invalides');
       }
+      
+      const loginData = await loginResponse.json();
+      const token = loginData.accessToken;
 
       // We need to fetch /me to get user details
       const userResponse = await fetch(`${baseUrl}/auth/me`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
 
@@ -52,7 +56,8 @@ export default function LoginPage() {
         id: userData.userId || userData.id,
         email: userData.email,
         role: userData.role,
-      });
+      }, token);
+      
       if (userData.role !== 'ADMIN' && userData.role !== 'AGENT') {
         throw new Error('Accès refusé. Seuls les administrateurs peuvent se connecter.');
       }

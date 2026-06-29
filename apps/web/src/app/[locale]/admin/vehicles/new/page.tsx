@@ -26,6 +26,7 @@ export default function AddVehiclePage() {
     deposit: 5000
   });
 
+  const { token } = useAuthStore();
   const [images, setImages] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +46,7 @@ export default function AddVehiclePage() {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
       const response = await fetch(`${baseUrl}/vehicles`, {
         method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
         body: form,
       });

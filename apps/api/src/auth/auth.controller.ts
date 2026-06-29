@@ -46,7 +46,7 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(dto);
     this.setCookies(res, tokens.accessToken, tokens.refreshToken);
-    return { message: 'Login successful' };
+    return { message: 'Login successful', accessToken: tokens.accessToken };
   }
 
   @UseGuards(RefreshTokenGuard)

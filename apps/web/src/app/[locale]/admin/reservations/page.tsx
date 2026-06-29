@@ -16,12 +16,13 @@ export default function AdminReservationsPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
 
   const fetchReservations = async () => {
     try {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
       const response = await fetch(`${baseUrl}/admin/reservations`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include'
       });
       if (response.ok) {

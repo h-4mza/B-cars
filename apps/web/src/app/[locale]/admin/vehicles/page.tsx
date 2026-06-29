@@ -33,7 +33,7 @@ export default function AdminVehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
+  const { token } = useAuthStore();
   const fetchVehicles = async () => {
     try {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
@@ -58,6 +58,7 @@ export default function AdminVehiclesPage() {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
       const response = await fetch(`${baseUrl}/vehicles/${id}`, {
         method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include'
       });
       if (!response.ok) throw new Error();
