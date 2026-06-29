@@ -38,7 +38,9 @@ export default function AdminVehiclesPage() {
   const fetchVehicles = async () => {
     try {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/vehicles`);
+      const response = await fetch(`${baseUrl}/vehicles`, {
+        cache: 'no-store'
+      });
       const data = await response.json();
       setVehicles(Array.isArray(data) ? data : (data.results || []));
     } catch (error) {

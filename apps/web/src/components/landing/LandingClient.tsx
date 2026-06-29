@@ -55,7 +55,7 @@ export default function LandingClient() {
 
   useEffect(() => {
     // Fetch vehicles from API
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/vehicles`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setVehicles(Array.isArray(data) ? data : []))
       .catch(err => console.error('Failed to fetch vehicles:', err));
