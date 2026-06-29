@@ -1,17 +1,15 @@
-services:
-  # Base de données PostgreSQL
-  - type: pgo
-    name: location-db
+databases:
+  - name: location-db
     plan: free
     region: frankfurt
 
-  # Backend NestJS
+services:
   - type: web
     name: location-api
     env: node
     plan: free
     region: frankfurt
-    buildCommand: pnpm install && pnpm db:generate && pnpm build
+    buildCommand: npm i -g pnpm && pnpm install && pnpm db:generate && pnpm db:push && pnpm build
     startCommand: cd apps/api && pnpm start:prod
     envVars:
       - key: DATABASE_URL
@@ -19,12 +17,10 @@ services:
           name: location-db
           property: connectionString
       - key: PORT
-        value: 4000
+        value: "4000"
       - key: NODE_ENV
         value: production
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
-        generateValue: true
-      - key: ENCRYPTION_KEY
         generateValue: true
