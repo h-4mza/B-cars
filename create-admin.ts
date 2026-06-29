@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const hashedPassword = await argon2.hash('admin123', { type: argon2.argon2id });
   
   const admin = await prisma.user.upsert({
     where: { email: 'admin@carjet.com' },
